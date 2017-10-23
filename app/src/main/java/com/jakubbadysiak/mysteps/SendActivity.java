@@ -11,13 +11,15 @@ public class SendActivity extends AppCompatActivity {
 
     private TextView tvPhoneDetails;
     private Button btnSendTo, btnSendMe;
-    private Intent intentChooseApp;
+    private Intent intentChooseApp,chosenIntent;
+    private String chooserTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
 
+        chooserTitle = getString(R.string.chooser);
         tvPhoneDetails = (TextView) findViewById(R.id.tvPhoneDetails);
         btnSendTo = (Button) findViewById(R.id.btnSendTo);
         btnSendMe = (Button) findViewById(R.id.btnSendMe);
@@ -27,13 +29,15 @@ public class SendActivity extends AppCompatActivity {
         tvPhoneDetails.setText(phone);
 
         intentChooseApp = new Intent(Intent.ACTION_SEND);
+        chosenIntent = Intent.createChooser(intentChooseApp, chooserTitle);
 
         btnSendTo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 intentChooseApp.setType("text/plain");
                 intentChooseApp.putExtra("phoneDetails", phone);
-                startActivity(intentChooseApp);
+                startActivity(chosenIntent);
             }
         });
     }

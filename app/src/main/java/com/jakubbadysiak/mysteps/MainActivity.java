@@ -48,8 +48,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private LocationTrackService locationTrackService;
 
     private Intent intentMessage;
-    //private Intent choosenIntent;
-    private String chooserTitle;
+
     private Intent intentMap;
     private StepDetector stepDetector;
     private SensorManager sensorManager;
@@ -67,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private double longitude, latitude, altitude;
     private ArrayList<LatLng> latLngList;
     private LatLng latLng;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +83,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
         }
 
+        context = getBaseContext();
         latLngList = new ArrayList<>();
-        chooserTitle = getString(R.string.chooser);
         batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -95,14 +95,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         telephonyManager.listen(myPhoneListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
         intentMap = new Intent(getBaseContext(), MapsActivity.class);
 
-        //intentMessage = new Intent(Intent.ACTION_SEND);
-        //choosenIntent = Intent.createChooser(intentMessage, chooserTitle);
-
         intentMessage = new Intent(getBaseContext(), SendActivity.class);
 
         tvSteps = (TextView) findViewById(R.id.tvSteps);
         btnStart = (Button) findViewById(R.id.btnStart);
         btnStop = (Button) findViewById(R.id.btnStop);
+        btnStop.setEnabled(false);
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (locationTrackService.canGetLocation()) {
                     numSteps = 0;
                     sensorManager.registerListener(MainActivity.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
-                }else {
+                    btnStop.setEnabled(true);
+                } else {
                     locationTrackService.showSettingsAlert();
                 }
             }
@@ -122,6 +121,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showStopAlert();
+            }
+        });
+
+
+    }
+
+    public void showStopAlert() {
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+        alertDialog.setTitle("Stop following me.");
+        alertDialog.setMessage("Do you want to stop following?");
+
+        alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
                 longitude = locationTrackService.getLongitude();
                 latitude = locationTrackService.getLatitude();
                 altitude = locationTrackService.getAltitude();
@@ -135,6 +150,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 batLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
                 phoneDetails = "Map data: \nLatitude=" + latitude + "\nLongitude=" + longitude + "\nAltitude=" + altitude + "\n" + TEXT_NUM_STEPS + numSteps + "\nAccelerator: \nX = " + x + "  Y = " + y + "  Z = " + z + "\nBattery = " + batLevel + "%\nSignal GSM = " + myPhoneListener.signalStrengthValue + "dB";
 
+                numSteps = 0;
+
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
                     String currentDateAndTime = sdf.format(new Date());
@@ -147,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     fileWriter.append(phoneDetails.toString());
                     fileWriter.flush();
                     fileWriter.close();
-                    Toast.makeText(getApplicationContext(),"Phone details were saved on your phone.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Phone details were saved on your phone.", Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -158,15 +175,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 intentMap.putExtra("phoneDetails", message);
 
                 startActivity(intentMap);
-
-
-                //intentMessage.setType("text/plain");
-                //intentMessage.putExtra(Intent.EXTRA_TEXT, message);
-                //startActivity(intentMessage);
-                //startActivity(choosenIntent);
             }
         });
 
+        alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        AlertDialog alert = alertDialog.create();
+        alert.show();
     }
 
     private ArrayList findUnAskedPermissions(ArrayList wanted) {
@@ -270,11 +290,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             if (locationTrackService.canGetLocation()) {
                 longitude = locationTrackService.getLongitude();
                 latitude = locationTrackService.getLatitude();
-                altitude = locationTrackService.getAltitude();
 
                 LatLng latLng = new LatLng(latitude, longitude);
-                Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(longitude) + "\nLatitude:" + Double.toString(latitude) + "\nAltitude:" + Double.toString(altitude), Toast.LENGTH_SHORT).show();
                 latLngList.add(latLng);
+                Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(longitude) + "\nLatitude:" + Double.toString(latitude), Toast.LENGTH_SHORT).show();
 
             } else {
                 locationTrackService.showSettingsAlert();

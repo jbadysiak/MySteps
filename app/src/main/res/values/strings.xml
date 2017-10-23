@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">MySteps</string>
     <string name="title_activity_maps">My Steps</string>
+    <string name="sendAct">Sending results</string>
     <string name="chooser">Sending message...</string>
     <string name="sendMail">Send Message!</string>
     <string name="sendMe">Send me</string>

@@ -53,7 +53,7 @@
             android:exported="false" />
 
         <activity android:name=".SendActivity"
-            android:label="@string/chooser"
+            android:label="@string/sendAct"
             android:parentActivityName=".MapsActivity"></activity>
     </application>
 

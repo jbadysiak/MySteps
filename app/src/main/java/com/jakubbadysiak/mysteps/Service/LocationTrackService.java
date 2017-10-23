@@ -16,12 +16,15 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
+import com.jakubbadysiak.mysteps.MainActivity;
+
 public class LocationTrackService extends Service implements LocationListener {
     private final Context context;
     private boolean checkGPS = false;
     private boolean checkNetwork = false;
     private boolean canGetLocation = false;
     private Location loc;
+    private MainActivity mainActivity;
     double latitude;
     double longitude;
     double altitude;
@@ -33,6 +36,7 @@ public class LocationTrackService extends Service implements LocationListener {
 
     public LocationTrackService(Context context) {
         this.context = context;
+        mainActivity = new MainActivity();
         getLocation();
     }
 
@@ -48,17 +52,9 @@ public class LocationTrackService extends Service implements LocationListener {
             } else {
                 this.canGetLocation = true;
 
-                // if GPS Enabled get lat/long using GPS Services
                 if (checkGPS) {
-
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
+
                     }
                     locationManager.requestLocationUpdates(
                             LocationManager.GPS_PROVIDER,
@@ -145,22 +141,15 @@ public class LocationTrackService extends Service implements LocationListener {
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-
-    }
+    public void onLocationChanged(Location location) {}
 
     @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
+    public void onStatusChanged(String s, int i, Bundle bundle) {}
 
     @Override
-    public void onProviderEnabled(String s) {
-
-    }
+    public void onProviderEnabled(String s) {}
 
     @Override
-    public void onProviderDisabled(String s) {
+    public void onProviderDisabled(String s) {}
 
-    }
 }
