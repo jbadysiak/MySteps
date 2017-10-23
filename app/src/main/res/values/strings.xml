@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MySteps</string>
+    <string name="title_activity_maps">My Steps</string>
+    <string name="chooser">Sending message...</string>
+</resources>
