@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private final static int ALL_PERMISSIONS_RESULT = 101;
     private LocationTrackService locationTrackService;
 
-    public static final String EXTRA_MESSAGE = "com.example.jakubbadysiak.MESSAGE";
     private Intent intentMessage;
     //private Intent choosenIntent;
     private String chooserTitle;
@@ -59,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accel;
     private static final String TEXT_NUM_STEPS = "Number of steps: ";
     private int numSteps;
-    private Button btnStart, btnStop, btnMap;
+    private Button btnStart, btnStop;
     private TextView tvSteps;
     private String phoneDetails;
     private float x, y, z;
@@ -104,7 +103,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         tvSteps = (TextView) findViewById(R.id.tvSteps);
         btnStart = (Button) findViewById(R.id.btnStart);
         btnStop = (Button) findViewById(R.id.btnStop);
-        btnMap = (Button) findViewById(R.id.btnMap);
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,6 +122,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                longitude = locationTrackService.getLongitude();
+                latitude = locationTrackService.getLatitude();
+                altitude = locationTrackService.getAltitude();
+
+                latLng = new LatLng(latitude, longitude);
+                latLngList.add(latLng);
+
                 sensorManager.unregisterListener(MainActivity.this);
                 locationTrackService.stopListener();
 
@@ -142,35 +147,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     fileWriter.append(phoneDetails.toString());
                     fileWriter.flush();
                     fileWriter.close();
+                    Toast.makeText(getApplicationContext(),"Phone details were saved on your phone.",Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
                 String message = phoneDetails.toString();
 
-                intentMessage.setType("text/plain");
-                intentMessage.putExtra(Intent.EXTRA_TEXT, message);
-                startActivity(intentMessage);
+                intentMap.putExtra("LatLngs", latLngList);
+                intentMap.putExtra("phoneDetails", message);
+
+                startActivity(intentMap);
+
+
+                //intentMessage.setType("text/plain");
+                //intentMessage.putExtra(Intent.EXTRA_TEXT, message);
+                //startActivity(intentMessage);
                 //startActivity(choosenIntent);
             }
         });
 
-        btnMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                longitude = locationTrackService.getLongitude();
-                latitude = locationTrackService.getLatitude();
-                altitude = locationTrackService.getAltitude();
-
-                latLng = new LatLng(latitude, longitude);
-                latLngList.add(latLng);
-
-                intentMap.putExtra("LatLngs", latLngList);
-
-                startActivity(intentMap);
-            }
-        });
     }
 
     private ArrayList findUnAskedPermissions(ArrayList wanted) {

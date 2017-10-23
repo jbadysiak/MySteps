@@ -13,5 +13,16 @@
         android:layout_height="match_parent"
         tools:context="com.jakubbadysiak.mysteps.MapsActivity" />
 
+    <Button
+        android:id="@+id/btnSendActiv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:fontFamily="monospace"
+        android:layout_alignParentEnd="true"
+        android:text="@string/sendMail"
+        android:textColor="@color/colorIcons"
+        android:background="@color/colorPrimaryBlue"/>
+
 
 </RelativeLayout>

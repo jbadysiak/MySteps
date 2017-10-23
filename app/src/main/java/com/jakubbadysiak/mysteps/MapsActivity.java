@@ -1,6 +1,7 @@
 package com.jakubbadysiak.mysteps;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
@@ -8,17 +9,20 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.widget.Button;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -32,8 +36,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private MarkerOptions markerStart;
     private MarkerOptions markerStop;
+    private Intent intentMesseage;
+    private Button btnSendActivity;
     private Polyline polyline;
-    private MainActivity mainActivity;
+    private String phoneDetails;
+    private LatLngBounds.Builder builder;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +52,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mainActivity = new MainActivity();
+        btnSendActivity = (Button) findViewById(R.id.btnSendActiv);
         latLngs = getIntent().getParcelableArrayListExtra("LatLngs");
+        phoneDetails = getIntent().getStringExtra("phoneDetails");
 
+        intentMesseage = new Intent(getBaseContext(), SendActivity.class);
 
+        btnSendActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intentMesseage.setType("text/plain");
+                intentMesseage.putExtra("phone",phoneDetails);
+
+                startActivity(intentMesseage);
+            }
+        });
 
     }
 
@@ -65,9 +84,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         markerStart = new MarkerOptions().title("Start point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         markerStop = new MarkerOptions().title("Stop point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+        builder = new LatLngBounds.Builder();
 
         drawPolylines();
 
+        zoomRoad();
+    }
+
+    private void zoomRoad() {
+        for (int i = 0; i < latLngs.size(); i++){
+            builder.include(latLngs.get(i));
+        }
+
+        int padding = 50;
+
+        LatLngBounds bounds = builder.build();
+
+        final CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback(){
+            @Override
+            public void onMapLoaded() {
+                mMap.animateCamera(cu);
+            }
+        });
     }
 
     private void drawPolylines() {
