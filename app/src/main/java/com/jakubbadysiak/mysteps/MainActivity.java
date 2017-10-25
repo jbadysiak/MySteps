@@ -284,8 +284,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         numSteps++;
         tvSteps.setText(TEXT_NUM_STEPS + numSteps);
 
+        locationTrackService = new LocationTrackService(MainActivity.this);
+
+        if (numSteps == 1){
+            if (locationTrackService.canGetLocation()) {
+                longitude = locationTrackService.getLongitude();
+                latitude = locationTrackService.getLatitude();
+
+                LatLng latLng = new LatLng(latitude, longitude);
+                latLngList.add(latLng);
+                Toast.makeText(getApplicationContext(), "Longitude:" + Double.toString(longitude) + "\nLatitude:" + Double.toString(latitude), Toast.LENGTH_SHORT).show();
+
+            } else {
+                locationTrackService.showSettingsAlert();
+            }
+        }
+
         if (numSteps % 5 == 0) {
-            locationTrackService = new LocationTrackService(MainActivity.this);
+
 
             if (locationTrackService.canGetLocation()) {
                 longitude = locationTrackService.getLongitude();

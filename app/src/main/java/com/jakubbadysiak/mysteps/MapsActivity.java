@@ -3,14 +3,17 @@ package com.jakubbadysiak.mysteps;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -28,7 +31,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
+import static android.R.attr.bitmap;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -41,6 +52,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Polyline polyline;
     private String phoneDetails;
     private LatLngBounds.Builder builder;
+//    public abstract void onSnapshotReady(Bitmap snapshot);
+//
+//    public final void snapshot(GoogleMap.SnapshotReadyCallback callback) {
+//
+//    }
 
 
     @Override
@@ -87,8 +103,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         builder = new LatLngBounds.Builder();
 
         drawPolylines();
-
         zoomRoad();
+        //mapScreen();
+
+    }
+
+    private void mapScreen(){
+
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                mMap.snapshot(new GoogleMap.SnapshotReadyCallback() {
+                    @Override
+                    public void onSnapshotReady(Bitmap bitmap) {
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+                            String currentDateAndTime = sdf.format(new Date());
+                            File root = new File(Environment.getExternalStorageDirectory(), "Notes");
+                            if (!root.exists()) {
+                                root.mkdirs();
+                            }
+                            File file = new File(root, currentDateAndTime + ".jpg");
+                            FileOutputStream out = new FileOutputStream(file);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                            //FileWriter fileWriter = new FileWriter(file);
+                            //fileWriter.close();
+                            //Toast.makeText(getApplicationContext(), "Phone details were saved on your phone.", Toast.LENGTH_SHORT).show();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
     }
 
     private void zoomRoad() {

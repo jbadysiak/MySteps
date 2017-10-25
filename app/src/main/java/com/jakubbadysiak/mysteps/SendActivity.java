@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 public class SendActivity extends AppCompatActivity {
 
+    private String phone = null;
     private TextView tvPhoneDetails;
     private Button btnSendTo, btnSendMe;
     private Intent intentChooseApp,chosenIntent;
@@ -24,19 +25,26 @@ public class SendActivity extends AppCompatActivity {
         btnSendTo = (Button) findViewById(R.id.btnSendTo);
         btnSendMe = (Button) findViewById(R.id.btnSendMe);
 
-        final String phone = getIntent().getStringExtra("phone");
+        phone = getIntent().getStringExtra("phone");
 
         tvPhoneDetails.setText(phone);
 
         intentChooseApp = new Intent(Intent.ACTION_SEND);
         chosenIntent = Intent.createChooser(intentChooseApp, chooserTitle);
 
+        btnSendMe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
         btnSendTo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 intentChooseApp.setType("text/plain");
-                intentChooseApp.putExtra("phoneDetails", phone);
+                intentChooseApp.putExtra(Intent.EXTRA_TEXT, phone);
                 startActivity(chosenIntent);
             }
         });
